@@ -138,7 +138,9 @@ function acoustid() {
       for (var i = 0; i < json.mbids.length; i++) {
         has_acoustids[json.mbids[i].mbid] = json.mbids[i].tracks.length > 0;
       }
-      $('.tbl tr td:nth-child(' + (3 - numb) + ')').each(function (i, td) { //for each recording get mbid
+      if (path.match(/edit/)) var classPath = ".details.merge-recordings ";
+      else if (path.match(/recording\/merge/)) var classPath = "";
+      $(''+classPath+'.tbl tr td:nth-child(' + (3 - numb) + ')').each(function (i, td) { //for each recording get mbid
         var tdRef = $(td).first().next();
         var mbidtocheck = extractRecordingMBID($(td).find('a').get(0));
         if (mbidtocheck === undefined) {
