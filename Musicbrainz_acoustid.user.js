@@ -160,7 +160,7 @@ function acoustid() {
       });
     });
   }
-  function updatePages() {
+  function updatePages(path) {
     if (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+/)) {
       updateArtistRecordingsPage();
       return;
