@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
+// @version       2016.3.21
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @include       *://musicbrainz.org/artist/*/recordings*
@@ -76,7 +77,7 @@ function acoustid() {
   function updateArtistRecordingsPage() {
     var mbids = [
     ];
-    $('.tbl tr td:nth-child(2) a').each(function (i, link) {
+    $('.tbl tr td + td:not(.video) a').each(function (i, link) {
       var mbid = extractRecordingMBID(link);
       if (mbid !== undefined) {
         mbids.push(mbid);
@@ -91,7 +92,7 @@ function acoustid() {
       for (var i = 0; i < json.mbids.length; i++) {
         has_acoustids[json.mbids[i].mbid] = json.mbids[i].tracks.length > 0;
       }
-      $('.tbl tr td:nth-child(2)').each(function (i, td) {
+      $('.tbl tr td + td:not(.video)').each(function (i, td) {
         var mbidtocheck = extractRecordingMBID($(td).find('a').get(0));
         if (mbidtocheck === undefined) {
           return;
