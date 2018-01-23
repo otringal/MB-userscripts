@@ -31,7 +31,6 @@ function acoustid() {
   function extractRecordingMBID(link) {
     if (link !== undefined) {
       var parts = link.href.split('/');
-      console.log(parts[3]);
       if (parts[3] == 'recording') {
         return parts[4]; //return MBID
       }
