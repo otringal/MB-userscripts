@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Ultimate list destroyer
-// @version       2019.9.5
+// @version       2019.10.18
 // @description   Hide/show very long work and/or country lists
 // @namespace     https://github.com/otringal/MB-userscripts
 // @grant         none
@@ -9,6 +9,7 @@
 // @include       *://*musicbrainz.org/release/*
 // @include       *://*musicbrainz.org/release-group/*
 // @include       *://*musicbrainz.org/artist/*/releases*
+// @include       *://*musicbrainz.org/label/*
 // @run-at        document-end
 // ==/UserScript==
 //
@@ -52,14 +53,18 @@ else if (removeCountries && alwaysShowCountries !=0 && url.match(/(release\/)/))
     showhide();
 }
 
-else if (removeCountries && alwaysShowCountries !=0 && (url.match(/release-group/) || url.match(/(artist).+(releases)/) )) {
-    if  (url.match(/release-group/)){
+else if (removeCountries && alwaysShowCountries !=0 && (url.match(/release-group/) || url.match(/(artist).+(releases)/) || url.match(/label/) )) {
+    if (url.match(/release-group/)){
         listpath = $(".tbl tr td:nth-last-child(4) ul");
         listpath2 = $(".tbl tr td:nth-last-child(5) ul");
     }
-    else if  (url.match(/(artist).+(releases)/)){
+    else if (url.match(/(artist).+(releases)/)){
         listpath = $(".tbl tr td:nth-last-child(4) ul");
         listpath2 = $(".tbl tr td:nth-last-child(5) ul");
+    }
+    else if (url.match(/label/)){
+        listpath = $(".tbl tr td:nth-last-child(3) ul");
+        listpath2 = $(".tbl tr td:nth-last-child(4) ul");
     }
 
     $(listpath).each(function(){
