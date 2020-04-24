@@ -1,29 +1,21 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2018.1.24
+// @version       2020.04.24
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
-// @include       *://musicbrainz.org/artist/*/recordings*
-// @include       *://musicbrainz.org/release/*
-// @exclude       *://musicbrainz.org/release/*/*
-// @include       *://musicbrainz.org/recording/*
-// @include       *://musicbrainz.org/recording/merge*
-// @include       *://*.musicbrainz.org/artist/*/recordings*
-// @include       *://*.musicbrainz.org/release/*
-// @exclude       *://*.musicbrainz.org/release/*/*
-// @include       *://*.musicbrainz.org/recording/*
-// @include       *://*.musicbrainz.org/recording/merge*
-// @include       *://*.musicbrainz.org/search/*
-// @include       *://musicbrainz.org/search/*
-// @include       *://*.musicbrainz.org/edit/*
-// @include       *://musicbrainz.org/edit/*
-// @include       *://*musicbrainz.org/artist/*/open_edits
-// @include       *://musicbrainz.org/artist/*/open_edits
-// @include       *://*.musicbrainz.org/user/*
-// @include       *://musicbrainz.org/user/*
+// @downloadURL   https://github.com/otringal/MB-userscripts/blob/master/Musicbrainz_acoustid.user.js
+// @updateURL     https://github.com/otringal/MB-userscripts/blob/master/Musicbrainz_acoustid.user.js
+// @include       *://*musicbrainz.org/artist/*/recordings*
+// @include       *://*musicbrainz.org/artist/*/*edits
+// @include       *://*musicbrainz.org/edit/*
+// @include       *://*musicbrainz.org/recording/merge*
+// @include       *://*musicbrainz.org/release/*
+// @include       *://*musicbrainz.org/search/*
+// @include       *://*musicbrainz.org/user/*/edits/*
+// @run-at        document-end
 // ==/UserScript==
 //
-//	This script is copy/pasted together (literally) from the following two scripts:
+//	This script was partially copy/pasted together from the following userscripts:
 //	* https://bitbucket.org/acoustid/musicbrainz-acoustid
 //	* http://userscripts.org/scripts/show/176866 by th1rtyf0ur
 //
@@ -56,7 +48,7 @@ function acoustid() {
         }
         if (remaining_mbids.length > 0) {
           findAcoustIDsByMBIDsInternal(remaining_mbids, result, callback);
-        } 
+        }
         else {
           callback(result);
         }
@@ -97,7 +89,7 @@ function acoustid() {
           return;
         }
         if (has_acoustids[mbidtocheck]) {
-          //ADD acoustid id img + hover over img acoustid comparison								
+          //ADD acoustid id img + hover over img acoustid comparison
           for (var b = 0; b < json.mbids.length; b++) {
             if (json.mbids[b].mbid == mbidtocheck) {
               $.each(json.mbids[b].tracks, function () {
@@ -114,16 +106,16 @@ function acoustid() {
       });
     });
   }
+  
   // Adds Acoustid to merge recordings edits
-
   function updateMergeOrEdits(check, path) {
     var mbids = [
     ];
     if (check) var numb = 0;
      else var numb = 1;
-    if (path.match(/edit/)) $('.details.merge-recordings thead tr th:nth-child(' + (4 - numb) + ')').after('<th>AcoustIDs</th>');
-    else if (path.match(/recording\/merge/)) $('.tbl thead tr th:nth-child(' + (4 - numb) + ')').after('<th>AcoustIDs</th>');
-    $('.tbl tr td:nth-child(' + (3 - numb) + ') a').each(function (i, link) {
+    if (path.match(/edit/)) $('.details.merge-recordings thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
+    else if (path.match(/recording\/merge/)) $('.tbl thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
+    $('.tbl tr td:nth-child(' + (2 - numb) + ') a').each(function (i, link) {
       var mbid = extractRecordingMBID(link);
       if (mbid !== undefined) {
         mbids.push(mbid);
@@ -140,33 +132,36 @@ function acoustid() {
       }
       if (path.match(/edit/)) var classPath = ".details.merge-recordings ";
       else if (path.match(/recording\/merge/)) var classPath = "";
-      $(''+classPath+'.tbl tr td:nth-child(' + (3 - numb) + ')').each(function (i, td) { //for each recording get mbid
+      $(''+classPath+'.tbl tr td:nth-child(' + (2 - numb) + ')').each(function (i, td) { //for each recording get mbid
         var tdRef = $(td).first().next();
         var mbidtocheck = extractRecordingMBID($(td).find('a').get(0));
         if (mbidtocheck === undefined) {
           return
         }
-        if (has_acoustids[mbidtocheck]) {
-          var newtd = '<td>';
-          for (var b = 0; b < json.mbids.length; b++) {
-            if (json.mbids[b].mbid == mbidtocheck) {
-              $.each(json.mbids[b].tracks, function () {
-                newtd += '<a href="http://acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
-              });
-              newtd += '</td>';
-            }
+      if (has_acoustids[mbidtocheck]) {
+        var newtd = '<td>';
+        for (var b = 0; b < json.mbids.length; b++) {
+          if (json.mbids[b].mbid == mbidtocheck) {
+            json.mbids[b].tracks.sort(function(z, x) {
+              return z.id > x.id;
+            });
+            $.each(json.mbids[b].tracks, function () {
+              newtd += '<a href="http://acoustid.org/track/' + this.id + '"><code>' + this.id.slice(0, 5) + '</code></a><br/>';
+            });
+            newtd += '</td>';
           }
-          $(tdRef).after(newtd);
-        } 
-        else $(tdRef).after('<td></td>');
+        }
+        $(tdRef).after(newtd);
+      }
+      else $(tdRef).after('<td></td>');
       });
     });
   }
   function updatePages(path) {
-    if (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+/)) {
-      updateArtistRecordingsPage();
+    if (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+$/)) {
+        updateArtistRecordingsPage();
       return;
-    } 
+    }
     else if (path.match(/recording\/merge/) || path.match(/edit/)) {
       if (path.match(/recording\/merge/)) var check = true;
        else var check = false;
