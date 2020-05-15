@@ -146,7 +146,7 @@ function acoustid() {
               return z.id > x.id;
             });
             $.each(json.mbids[b].tracks, function () {
-              newtd += '<a href="http://acoustid.org/track/' + this.id + '"><code>' + this.id.slice(0, 5) + '</code></a><br/>';
+              newtd += '<a href="//acoustid.org/track/' + this.id + '"><code>' + this.id.slice(0, 5) + '</code></a><br/>';
             });
             newtd += '</td>';
           }
