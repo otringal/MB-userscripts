@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2020.04.24
+// @version       2020.5.15
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/blob/master/Musicbrainz_acoustid.user.js
@@ -20,6 +20,12 @@
 //	* http://userscripts.org/scripts/show/176866 by th1rtyf0ur
 //
 function acoustid() {
+  var css = document.createElement("style");
+  css.setAttribute("type", "text/css");
+  document.head.appendChild(css);
+  css = css.sheet;
+  // Display only 6 first characters of acoustid code but allow full acoustid search in page
+  css.insertRule("td > a[href^='//acoustid.org/track/'] > code {display: inline-block; white-space: nowrap; overflow-x: hidden; width: 6ch}", 0);
   function extractRecordingMBID(link) {
     if (link !== undefined) {
       var parts = link.href.split('/');
@@ -146,7 +152,7 @@ function acoustid() {
               return z.id > x.id;
             });
             $.each(json.mbids[b].tracks, function () {
-              newtd += '<a href="http://acoustid.org/track/' + this.id + '"><code>' + this.id.slice(0, 5) + '</code></a><br/>';
+              newtd += '<a href="//acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
             });
             newtd += '</td>';
           }
