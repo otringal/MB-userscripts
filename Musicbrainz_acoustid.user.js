@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2020.5.15
+// @version       2020.9.10
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/blob/master/Musicbrainz_acoustid.user.js
@@ -12,6 +12,7 @@
 // @include       *://*musicbrainz.org/release/*
 // @include       *://*musicbrainz.org/search/*
 // @include       *://*musicbrainz.org/user/*/edits/*
+// @require       https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @run-at        document-end
 // ==/UserScript==
 //
@@ -19,13 +20,21 @@
 //	* https://bitbucket.org/acoustid/musicbrainz-acoustid
 //	* http://userscripts.org/scripts/show/176866 by th1rtyf0ur
 //
-function acoustid() {
+/*----/ USER SETTINGS /----*/
+var enableMiniIcons = true; //set to "true" to enable the mini AcoustID icons on the release and artist/recordings pages, "false" to disable.
+var enableAcoustList = true; //set to "true" to enable the AcoustID lists on edit pages, "false" to disable.
+var addShowHideButton = true; //set to "true" to enable the "show/hide" buttons, "false" to disable.
+var alwaysShowIds = 5; //number of ids always shown on the AcoustID list (per recording).
+var numCharacters = 6; //number of characters shown of the AcoudID code.
+/*----/ USER SETTINGS /----*/
+//
+  var hiddenlength = 0;
   var css = document.createElement("style");
-  css.setAttribute("type", "text/css");
-  document.head.appendChild(css);
-  css = css.sheet;
-  // Display only 6 first characters of acoustid code but allow full acoustid search in page
-  css.insertRule("td > a[href^='//acoustid.org/track/'] > code {display: inline-block; white-space: nowrap; overflow-x: hidden; width: 6ch}", 0);
+    css.setAttribute("type", "text/css");
+    css.innerHTML = "td > a[href^='//acoustid.org/track/'] > code {display: inline-block; white-space: nowrap; overflow-x: hidden; width: "+ numCharacters +"ch}";
+    css.innerHTML += ".hidelist, .hidelist + br {display: none;} .showids span {white-space: nowrap; margin: 0.4em 0em; padding: 0.1em 0.3em; font-size: smaller; text-transform: uppercase; font-weight: 600; background-color: rgba(250, 200, 35, 0.5); cursor: pointer;}";
+    document.head.appendChild(css);
+
   function extractRecordingMBID(link) {
     if (link !== undefined) {
       var parts = link.href.split('/');
@@ -112,7 +121,6 @@ function acoustid() {
       });
     });
   }
-  
   // Adds Acoustid to merge recordings edits
   function updateMergeOrEdits(check, path) {
     var mbids = [
@@ -142,7 +150,7 @@ function acoustid() {
         var tdRef = $(td).first().next();
         var mbidtocheck = extractRecordingMBID($(td).find('a').get(0));
         if (mbidtocheck === undefined) {
-          return
+          return;
         }
       if (has_acoustids[mbidtocheck]) {
         var newtd = '<td>';
@@ -151,10 +159,26 @@ function acoustid() {
             json.mbids[b].tracks.sort(function(z, x) {
               return z.id > x.id;
             });
-            $.each(json.mbids[b].tracks, function () {
-              newtd += '<a href="//acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
-            });
-            newtd += '</td>';
+              if (addShowHideButton && alwaysShowIds !=0 && json.mbids[b].tracks.length > alwaysShowIds){
+                hiddenlength = json.mbids[b].tracks.length - alwaysShowIds;
+                var breaknum = 0;
+                $.each(json.mbids[b].tracks, function () {
+                    if (breaknum < alwaysShowIds) {
+                      breaknum++;
+                      newtd += '<a href="//acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
+                    }
+                    else newtd += '<a class="hidelist" href="//acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
+                });
+                newtd += "<div class='showids allids'><span>show all (+"+hiddenlength+")</span></div>";
+                showhide();
+                break;
+              }
+              else {
+                $.each(json.mbids[b].tracks, function () {
+                  newtd += '<a href="//acoustid.org/track/' + this.id + '"><code>' + this.id + '</code></a><br/>';
+                });
+                newtd += '</td>';
+              }
           }
         }
         $(tdRef).after(newtd);
@@ -163,20 +187,28 @@ function acoustid() {
       });
     });
   }
+  function showhide(){
+    $(document).off("click").on("click", ".showids", function(){
+        if($(this).hasClass("allids")){
+            $(this).addClass("lessids").removeClass("allids").children(0).html("show less");
+          }
+        else if($(this).hasClass("lessids")){
+            hiddenlength = $(this).siblings('.hidelist').length+1;
+            $(this).addClass("allids").removeClass("lessids").children(0).html("show all (+"+(hiddenlength-1)+")");
+        }
+        $(this).siblings('.hidelist, .hidelist + br').toggle();
+    });
+  }
   function updatePages(path) {
-    if (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+$/)) {
+    if (enableMiniIcons && (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+$/))) {
         updateArtistRecordingsPage();
       return;
     }
-    else if (path.match(/recording\/merge/) || path.match(/edit/)) {
+    else if (enableAcoustList && (path.match(/recording\/merge/) || path.match(/edit/))) {
       if (path.match(/recording\/merge/)) var check = true;
        else var check = false;
       updateMergeOrEdits(check, path);
       return;
     }
   }
-  updatePages(window.location.href);
-}
-var script = document.createElement('script');
-script.appendChild(document.createTextNode('(' + acoustid + ')();'));
-document.body.appendChild(script);
+updatePages(window.location.href);
