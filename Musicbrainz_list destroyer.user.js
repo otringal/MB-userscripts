@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name          Musicbrainz: Ultimate list destroyer
-// @version       2019.10.18
+// @version       2021.2.25
 // @description   Hide/show very long work and/or country lists
 // @namespace     https://github.com/otringal/MB-userscripts
 // @grant         none
-// @require       http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-// @include       *://*musicbrainz.org/artist/*/works*
-// @include       *://*musicbrainz.org/release/*
-// @include       *://*musicbrainz.org/release-group/*
-// @include       *://*musicbrainz.org/artist/*/releases*
-// @include       *://*musicbrainz.org/label/*
+// @match         *://*.musicbrainz.org/artist/*/works*
+// @match         *://*.musicbrainz.org/release/*
+// @match         *://*.musicbrainz.org/release-group/*
+// @match         *://*.musicbrainz.org/artist/*/releases*
+// @match         *://*.musicbrainz.org/label/*
+// @exclude       *musicbrainz.org/release/*/edit
+// @exclude       *musicbrainz.org/release/*/edit-relationships
 // @run-at        document-end
 // ==/UserScript==
 //
