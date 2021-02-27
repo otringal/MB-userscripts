@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2021.2.25
+// @version       2021.2.27
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/raw/master/Musicbrainz_acoustid.user.js
 // @updateURL     https://github.com/otringal/MB-userscripts/raw/master/Musicbrainz_acoustid.user.js
 // @match         *://*.musicbrainz.org/artist/*/recordings*
 // @match         *://*.musicbrainz.org/artist/*/*edits
+// @match         *://*.musicbrainz.org/collection/*/*
 // @match         *://*.musicbrainz.org/edit/*
-// @match         *://*.musicbrainz.org/recording/merge*
 // @match         *://*.musicbrainz.org/release/*
 // @match         *://*.musicbrainz.org/search/*
-// @match         *://*.musicbrainz.org/user/*/edits/*
+// @match         *://*.musicbrainz.org/user/*/edits*
+// @match         *://*.musicbrainz.org/user/*/votes*
 // @exclude       *musicbrainz.org/release/*/edit
 // @exclude       *musicbrainz.org/release/*/edit-relationships
 // @run-at        document-end
@@ -128,7 +129,7 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
     ];
     if (check) var numb = 0;
      else var numb = 1;
-    if (path.match(/edit/)) $('.details.merge-recordings thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
+    if (path.match(/edit/) || path.match(/votes/)) $('.details.merge-recordings thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
     else if (path.match(/recording\/merge/)) $('.tbl thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
     $('.tbl tr td:nth-child(' + (2 - numb) + ') a').each(function (i, link) {
       var mbid = extractRecordingMBID(link);
@@ -145,7 +146,7 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
       for (var i = 0; i < json.mbids.length; i++) {
         has_acoustids[json.mbids[i].mbid] = json.mbids[i].tracks.length > 0;
       }
-      if (path.match(/edit/)) var classPath = ".details.merge-recordings ";
+      if (path.match(/edit/) || path.match(/votes/)) var classPath = ".details.merge-recordings ";
       else if (path.match(/recording\/merge/)) var classPath = "";
       $(''+classPath+'.tbl tr td:nth-child(' + (2 - numb) + ')').each(function (i, td) { //for each recording get mbid
         var tdRef = $(td).first().next();
@@ -205,7 +206,7 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
         updateArtistRecordingsPage();
       return;
     }
-    else if (enableAcoustList && (path.match(/recording\/merge/) || path.match(/edit/))) {
+    else if (enableAcoustList && (path.match(/recording\/merge/) || path.match(/edit/) || path.match(/votes/))) {
       if (path.match(/recording\/merge/)) var check = true;
        else var check = false;
       updateMergeOrEdits(check, path);
