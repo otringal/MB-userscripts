@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2023.9.3
+// @version       2023.10.15
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/raw/master/Musicbrainz_acoustid.user.js
@@ -127,14 +127,11 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
     });
   }
   // Adds Acoustid to merge recordings edits
-  function updateMergeOrEdits(check, path) {
+  function updateMergeOrEdits(path) {
     var mbids = [
     ];
-    if (check) var numb = 0;
-     else var numb = 1;
-    if (path.match(/edit/) || path.match(/votes/)) $('.details.merge-recordings thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
-    else if (path.match(/recording\/merge/)) $('.tbl thead tr th:nth-child(' + (3 - numb) + ')').after('<th>AcoustIDs</th>');
-    $('.tbl tr td:nth-child(' + (2 - numb) + ') a').each(function (i, link) {
+    $('.details.merge-recordings thead tr th:nth-child(2)').after('<th>AcoustIDs</th>');
+    $('.tbl tr td:nth-child(1) a').each(function (i, link) {
       var mbid = extractRecordingMBID(link);
       if (mbid !== undefined) {
         mbids.push(mbid);
@@ -149,9 +146,8 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
       for (var i = 0; i < json.mbids.length; i++) {
         has_acoustids[json.mbids[i].mbid] = json.mbids[i].tracks.length > 0;
       }
-      if (path.match(/edit/) || path.match(/votes/)) var classPath = ".details.merge-recordings ";
-      else if (path.match(/recording\/merge/)) var classPath = "";
-      $(''+classPath+'.tbl tr td:nth-child(' + (2 - numb) + ')').each(function (i, td) { //for each recording get mbid
+      var classPath = ".details.merge-recordings ";
+      $(''+classPath+'.tbl tr td:nth-child(1)').each(function (i, td) { //for each recording get mbid
         var tdRef = $(td).first().next();
         var mbidtocheck = extractRecordingMBID($(td).find('a').get(0));
         if (mbidtocheck === undefined) {
@@ -209,10 +205,8 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
         updateArtistRecordingsPage();
       return;
     }
-    else if (enableAcoustList && (path.match(/recording\/merge/) || path.match(/edit/) || path.match(/votes/))) {
-      if (path.match(/recording\/merge/)) var check = true;
-       else var check = false;
-      updateMergeOrEdits(check, path);
+    else if (enableAcoustList && (path.match(/edit/) || path.match(/votes/))) {
+      updateMergeOrEdits(path);
       return;
     }
   }
