@@ -201,7 +201,7 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
     });
   }
   function updatePages(path) {
-    if (enableMiniIcons && (path.match(/artist\/[A-Fa-f0-9-]+\/recordings/) || path.match(/release\/[A-Fa-f0-9-]+$/))) {
+    if (enableMiniIcons && (path.match(/artist\/[A-Fa-f0-9-]{36}\/recordings/) || path.match(/release\/[A-Fa-f0-9-]{36}(\/(disc\/\d+)?)?(#.*)?$/))) {
         updateArtistRecordingsPage();
       return;
     }
