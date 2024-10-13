@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2023.10.15
+// @version       2024.10.13
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/raw/master/Musicbrainz_acoustid.user.js
