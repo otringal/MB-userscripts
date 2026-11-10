@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Musicbrainz: Compare AcoustIDs easier!
-// @version       2024.10.13
+// @version       2026.11.6
 // @description   Displays AcoustID fingerprints in more places at MusicBrainz.
 // @grant         none
 // @downloadURL   https://github.com/otringal/MB-userscripts/raw/master/Musicbrainz_acoustid.user.js
@@ -158,7 +158,7 @@ var numCharacters = 6; //number of characters shown of the AcoudID code.
         for (var b = 0; b < json.mbids.length; b++) {
           if (json.mbids[b].mbid == mbidtocheck) {
             json.mbids[b].tracks.sort(function(z, x) {
-              return z.id > x.id;
+              return z.id > x.id ? 1 : -1;
             });
               if (addShowHideButton && alwaysShowIds !=0 && json.mbids[b].tracks.length > alwaysShowIds){
                 hiddenlength = json.mbids[b].tracks.length - alwaysShowIds;
